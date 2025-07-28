@@ -1,0 +1,3 @@
+UdpPort = 2424
+RecordingPlaylist = [ "Test" ]
+IsLoggingEnabled = true

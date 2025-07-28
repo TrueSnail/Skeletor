@@ -40,7 +40,7 @@ public class SkeletonDataReceiver : MonoBehaviour
 
             if (ConfigLoader.ConfigData.IpAdressWhitelist.Contains(endPoint.Address.ToString()))
             {
-                SkeletonDataModel command = DeserializeMessage(message);
+                List<SkeletonDataModel.Root> command = DeserializeMessage(message);
                 lock (ExecuteOnMainThread) ExecuteOnMainThread.Enqueue(() => HandleCommand(command));
             }
         }
@@ -53,15 +53,15 @@ public class SkeletonDataReceiver : MonoBehaviour
         UdpClient.BeginReceive(OnPacketRecived, null);
     }
 
-    SkeletonDataModel DeserializeMessage(string message)
+    List<SkeletonDataModel.Root> DeserializeMessage(string message)
     {
         JsonSerializerSettings settings = new() { MissingMemberHandling = MissingMemberHandling.Error };
-        return JsonConvert.DeserializeObject<SkeletonDataModel>(message, settings);
+        return JsonConvert.DeserializeObject<List<SkeletonDataModel.Root>>(message, settings);
     }
 
-    private void HandleCommand(SkeletonDataModel command)
+    private void HandleCommand(List<SkeletonDataModel.Root> command)
     {
-        Debug.Log($"Received data succesfully: {command.TEST}");
+        Debug.Log($"Received data succesfully: {command[0].ToString()}");
     }
 
     private void OnDestroy()

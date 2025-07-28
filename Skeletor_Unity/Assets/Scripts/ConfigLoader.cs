@@ -17,7 +17,5 @@ public static class ConfigLoader
 
         var parseOptions = new TomlModelOptions() { ConvertPropertyName = s => s };
         ConfigData = Toml.ToModel<ConfigDataModel>(configText, options: parseOptions);
-
-        Debug.Log($"{ConfigData.UdpPort}, {ConfigData.LogReceivedUdpPackets}, {ConfigData.IpAdressWhitelist.Length}, {ConfigData.IpAdressWhitelist[0]}");
     }
 }
