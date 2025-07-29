@@ -10,6 +10,25 @@ using UnityEngine;
 
 public class SkeletonDataReceiver : MonoBehaviour
 {
+    [Header("TEST")]
+    public GameObject Hips;
+    public GameObject LeftLegUp;
+    public GameObject RightLegUp;
+    public GameObject LeftShoulder;
+    public GameObject RightShoulder;
+    public GameObject Neck;
+    public GameObject Head;
+    public GameObject LeftArm;
+    public GameObject LeftForearm;
+    public GameObject LeftHand;
+    public GameObject RightArm;
+    public GameObject RightForearm;
+    public GameObject RightHand;
+    public GameObject LeftKnee;
+    public GameObject LeftFoot;
+    public GameObject RightKnee;
+    public GameObject RightFoot;
+
     private UdpClient UdpClient;
     private Queue<Action> ExecuteOnMainThread = new();
 
@@ -62,6 +81,30 @@ public class SkeletonDataReceiver : MonoBehaviour
     private void HandleCommand(List<SkeletonDataModel.Root> command)
     {
         Debug.Log($"Received data succesfully: {command[0].ToString()}");
+
+        //TEMP
+        Hips.transform.position = TEMPCONVERT(command[0].pose.Pelvis);
+        LeftLegUp.transform.position = TEMPCONVERT(command[0].pose.LeftHip);
+        RightLegUp.transform.position = TEMPCONVERT(command[0].pose.RightHip);
+        LeftShoulder.transform.position = TEMPCONVERT(command[0].pose.LeftClavicle);
+        RightShoulder.transform.position = TEMPCONVERT(command[0].pose.RightClavicle);
+        Neck.transform.position = TEMPCONVERT(command[0].pose.Neck);
+        Head.transform.position = TEMPCONVERT(command[0].pose.Head);
+        LeftArm.transform.position = TEMPCONVERT(command[0].pose.LeftElbow);
+        //LeftForearm.transform.position = TEMPCONVERT(command[0].pose.left
+        LeftHand.transform.position = TEMPCONVERT(command[0].pose.LeftWrist);
+        RightArm.transform.position = TEMPCONVERT(command[0].pose.RightElbow);
+        //RightForearm.transform.position = TEMPCONVERT(command[0].pose
+        RightHand.transform.position = TEMPCONVERT(command[0].pose.RightWrist);
+        LeftKnee.transform.position = TEMPCONVERT(command[0].pose.LeftKnee);
+        LeftFoot.transform.position = TEMPCONVERT(command[0].pose.LeftAnkle);
+        RightKnee.transform.position = TEMPCONVERT(command[0].pose.RightKnee);
+        RightFoot.transform.position = TEMPCONVERT(command[0].pose.RightAnkle);
+    }
+
+    private Vector3 TEMPCONVERT(List<double> list)
+    {
+        return new Vector3((float)list[0], (float)list[1], (float)list[2]);
     }
 
     private void OnDestroy()
