@@ -1,0 +1,6 @@
+# Socket Config #
+UdpPort = 4242
+IpAdressWhitelist = [ "127.0.0.1" ]
+
+# Logging #
+LogReceivedUdpPackets = true
