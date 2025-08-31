@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using SkeletonDataModel;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,24 +11,26 @@ using UnityEngine;
 
 public class SkeletonDataReceiver : MonoBehaviour
 {
+    public bool PinToWorldRoot = false;
+
     [Header("TEST")]
-    public GameObject Hips;
-    public GameObject LeftLegUp;
-    public GameObject RightLegUp;
-    public GameObject LeftShoulder;
-    public GameObject RightShoulder;
-    public GameObject Neck;
-    public GameObject Head;
-    public GameObject LeftArm;
-    public GameObject LeftForearm;
-    public GameObject LeftHand;
-    public GameObject RightArm;
-    public GameObject RightForearm;
-    public GameObject RightHand;
-    public GameObject LeftKnee;
-    public GameObject LeftFoot;
-    public GameObject RightKnee;
-    public GameObject RightFoot;
+    public Transform Hips;
+    public Transform LeftLegUp;
+    public Transform RightLegUp;
+    public Transform LeftShoulder;
+    public Transform RightShoulder;
+    public Transform Neck;
+    public Transform Head;
+    public Transform LeftArm;
+    public Transform LeftForearm;
+    public Transform LeftHand;
+    public Transform RightArm;
+    public Transform RightForearm;
+    public Transform RightHand;
+    public Transform LeftKnee;
+    public Transform LeftFoot;
+    public Transform RightKnee;
+    public Transform RightFoot;
 
     private UdpClient UdpClient;
     private Queue<Action> ExecuteOnMainThread = new();
@@ -82,24 +85,37 @@ public class SkeletonDataReceiver : MonoBehaviour
     {
         Debug.Log($"Received data succesfully: {command[0].ToString()}");
 
+        UnityRotationPose pose = UnityRotationPose.FromPose(command[0].pose);
+
+        Hips.position = PinToWorldRoot ? Vector3.zero : pose.Position;
+        LeftLegUp.rotation = pose.LeftUpLeg;
+        RightLegUp.rotation = pose.RightUpLeg;
+        LeftKnee.rotation = pose.LeftLeg;
+        RightKnee.rotation = pose.RightLeg;
+        LeftShoulder.rotation = pose.LeftArm;
+        RightShoulder.rotation = pose.RightArm;
+        LeftForearm.rotation = pose.LeftForeArm;
+        RightForearm.rotation = pose.RightForeArm;
+        Neck.rotation = pose.Neck;
+
         //TEMP
-        Hips.transform.position = TEMPCONVERT(command[0].pose.Pelvis);
-        LeftLegUp.transform.position = TEMPCONVERT(command[0].pose.LeftHip);
-        RightLegUp.transform.position = TEMPCONVERT(command[0].pose.RightHip);
-        LeftShoulder.transform.position = TEMPCONVERT(command[0].pose.LeftClavicle);
-        RightShoulder.transform.position = TEMPCONVERT(command[0].pose.RightClavicle);
-        Neck.transform.position = TEMPCONVERT(command[0].pose.Neck);
-        Head.transform.position = TEMPCONVERT(command[0].pose.Head);
-        LeftArm.transform.position = TEMPCONVERT(command[0].pose.LeftElbow);
-        //LeftForearm.transform.position = TEMPCONVERT(command[0].pose.left
-        LeftHand.transform.position = TEMPCONVERT(command[0].pose.LeftWrist);
-        RightArm.transform.position = TEMPCONVERT(command[0].pose.RightElbow);
-        //RightForearm.transform.position = TEMPCONVERT(command[0].pose
-        RightHand.transform.position = TEMPCONVERT(command[0].pose.RightWrist);
-        LeftKnee.transform.position = TEMPCONVERT(command[0].pose.LeftKnee);
-        LeftFoot.transform.position = TEMPCONVERT(command[0].pose.LeftAnkle);
-        RightKnee.transform.position = TEMPCONVERT(command[0].pose.RightKnee);
-        RightFoot.transform.position = TEMPCONVERT(command[0].pose.RightAnkle);
+        //Hips.transform.position = TEMPCONVERT(command[0].pose.Pelvis);
+        //LeftLegUp.transform.position = TEMPCONVERT(command[0].pose.LeftHip);
+        //RightLegUp.transform.position = TEMPCONVERT(command[0].pose.RightHip);
+        //LeftShoulder.transform.position = TEMPCONVERT(command[0].pose.LeftClavicle);
+        //RightShoulder.transform.position = TEMPCONVERT(command[0].pose.RightClavicle);
+        //Neck.transform.position = TEMPCONVERT(command[0].pose.Neck);
+        //Head.transform.position = TEMPCONVERT(command[0].pose.Head);
+        //LeftArm.transform.position = TEMPCONVERT(command[0].pose.LeftElbow);
+        ////LeftForearm.transform.position = TEMPCONVERT(command[0].pose.left
+        //LeftHand.transform.position = TEMPCONVERT(command[0].pose.LeftWrist);
+        //RightArm.transform.position = TEMPCONVERT(command[0].pose.RightElbow);
+        ////RightForearm.transform.position = TEMPCONVERT(command[0].pose
+        //RightHand.transform.position = TEMPCONVERT(command[0].pose.RightWrist);
+        //LeftKnee.transform.position = TEMPCONVERT(command[0].pose.LeftKnee);
+        //LeftFoot.transform.position = TEMPCONVERT(command[0].pose.LeftAnkle);
+        //RightKnee.transform.position = TEMPCONVERT(command[0].pose.RightKnee);
+        //RightFoot.transform.position = TEMPCONVERT(command[0].pose.RightAnkle);
     }
 
     private Vector3 TEMPCONVERT(List<double> list)
