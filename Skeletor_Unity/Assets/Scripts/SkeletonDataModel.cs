@@ -107,6 +107,7 @@ namespace SkeletonDataModel
     public class UnityRotationPose
     {
         public Vector3 Position { get; set; }
+        public Quaternion Rotation { get; set; }
         public Quaternion LeftUpLeg { get; set; }
         public Quaternion RightUpLeg { get; set; }
         public Quaternion LeftLeg { get; set; }
@@ -125,6 +126,9 @@ namespace SkeletonDataModel
             return new UnityRotationPose()
             {
                 Position = positionPose.Pelvis,
+                Rotation = Quaternion.LookRotation(Vector3.Cross(positionPose.RightHip - positionPose.LeftHip, Vector3.up), Vector3.Cross(Vector3.Cross(positionPose.RightHip - positionPose.LeftHip, Vector3.up), positionPose.RightHip - positionPose.LeftHip)),
+                //Rotation = Quaternion.LookRotation(Vector3.Cross(direction, Vector3.forward), Vector3.Cross(positionPose.LeftHip - positionPose.RightHip, Vector3.right)),
+                //Rotation = Quaternion.FromToRotation(Vector3.right, positionPose.LeftHip - positionPose.RightHip),
                 LeftUpLeg = GetRotation(positionPose.LeftHip, positionPose.LeftKnee),
                 RightUpLeg = GetRotation(positionPose.RightHip, positionPose.RightKnee),
                 LeftLeg = GetRotation(positionPose.LeftKnee, positionPose.LeftAnkle),
@@ -140,7 +144,9 @@ namespace SkeletonDataModel
         private static Quaternion GetRotation(Vector3 startBone, Vector3 endBone)
         {
             var direction = endBone - startBone;
-            return Quaternion.LookRotation(direction.normalized);
+            return Quaternion.LookRotation(Vector3.Cross(direction, Vector3.right), direction);
+            //return Quaternion.FromToRotation(Vector3.up, direction);
+            //return Quaternion.LookRotation(direction.normalized);
         }
     }
 }

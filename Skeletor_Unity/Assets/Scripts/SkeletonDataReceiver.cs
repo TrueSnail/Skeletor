@@ -92,6 +92,7 @@ public class SkeletonDataReceiver : MonoBehaviour
         UnityRotationPose pose = UnityRotationPose.FromPose(command[0].pose);
 
         Hips.position = PinToWorldRoot ? Vector3.zero : pose.Position;
+        Hips.rotation = pose.Rotation;
         LeftLegUp.rotation = pose.LeftUpLeg;
         RightLegUp.rotation = pose.RightUpLeg;
         LeftKnee.rotation = pose.LeftLeg;
