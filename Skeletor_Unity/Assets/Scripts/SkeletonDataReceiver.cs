@@ -32,8 +32,11 @@ public class SkeletonDataReceiver : MonoBehaviour
     public Transform RightKnee;
     public Transform RightFoot;
 
+    public bool DrawDebugPose = true;
+
     private UdpClient UdpClient;
     private Queue<Action> ExecuteOnMainThread = new();
+    private SkeletonDataModel.Root Skeleton;
 
     private void Awake()
     {
@@ -60,7 +63,7 @@ public class SkeletonDataReceiver : MonoBehaviour
                 lock (ExecuteOnMainThread) ExecuteOnMainThread.Enqueue(() => Debug.Log($"Received UDP message: {message}, {endPoint.Address}"));
             }
 
-            if (ConfigLoader.ConfigData.IpAdressWhitelist.Contains(endPoint.Address.ToString()))
+            if (true/*ConfigLoader.ConfigData.IpAdressWhitelist.Contains(endPoint.Address.ToString())*/)
             {
                 List<SkeletonDataModel.Root> command = DeserializeMessage(message);
                 lock (ExecuteOnMainThread) ExecuteOnMainThread.Enqueue(() => HandleCommand(command));
@@ -84,6 +87,7 @@ public class SkeletonDataReceiver : MonoBehaviour
     private void HandleCommand(List<SkeletonDataModel.Root> command)
     {
         Debug.Log($"Received data succesfully: {command[0].ToString()}");
+        Skeleton = command[0];
 
         UnityRotationPose pose = UnityRotationPose.FromPose(command[0].pose);
 
@@ -132,4 +136,48 @@ public class SkeletonDataReceiver : MonoBehaviour
         }
     }
 
+    private void OnDrawGizmos()
+    {
+        if (Skeleton == null || !DrawDebugPose) return;
+        var pose = UnityPositionPose.FromPose(Skeleton.pose);
+
+        float pointRadius = 0.05f;
+
+        Gizmos.color = Color.white;
+        Gizmos.DrawSphere(pose.Pelvis, pointRadius);
+        Gizmos.DrawSphere(pose.LeftClavicle, pointRadius);
+        Gizmos.DrawSphere(pose.RightClavicle, pointRadius);
+        Gizmos.DrawSphere(pose.Neck, pointRadius);
+        Gizmos.DrawSphere(pose.Head, pointRadius);
+
+        Gizmos.DrawLine(pose.LeftHip, pose.Pelvis);
+        Gizmos.DrawLine(pose.Pelvis, pose.RightHip);
+        Gizmos.DrawLine(pose.RightClavicle, pose.LeftClavicle);
+        Gizmos.DrawLine(pose.Neck, pose.Head);
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawSphere(pose.LeftHip, pointRadius);
+        Gizmos.DrawSphere(pose.RightHip, pointRadius);
+        Gizmos.DrawSphere(pose.RightKnee, pointRadius);
+        Gizmos.DrawSphere(pose.LeftKnee, pointRadius);
+        Gizmos.DrawSphere(pose.RightAnkle, pointRadius);
+        Gizmos.DrawSphere(pose.LeftAnkle, pointRadius);
+
+        Gizmos.DrawLine(pose.RightHip, pose.RightKnee);
+        Gizmos.DrawLine(pose.LeftHip, pose.LeftKnee);
+        Gizmos.DrawLine(pose.RightAnkle, pose.RightKnee);
+        Gizmos.DrawLine(pose.LeftAnkle, pose.LeftKnee);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(pose.RightElbow, pointRadius);
+        Gizmos.DrawSphere(pose.LeftElbow, pointRadius);
+        Gizmos.DrawSphere(pose.RightWrist, pointRadius);
+        Gizmos.DrawSphere(pose.LeftWrist, pointRadius);
+
+        Gizmos.DrawLine(pose.RightElbow, pose.RightClavicle);
+        Gizmos.DrawLine(pose.RightElbow, pose.RightWrist);
+        Gizmos.DrawLine(pose.LeftElbow, pose.LeftClavicle);
+        Gizmos.DrawLine(pose.LeftElbow, pose.LeftWrist);
+
+    }
 }
