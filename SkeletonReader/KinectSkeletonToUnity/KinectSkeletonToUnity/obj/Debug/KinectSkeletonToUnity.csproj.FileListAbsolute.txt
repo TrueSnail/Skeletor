@@ -1,0 +1,11 @@
+E:\Inzynierka\KinectSkeletonToUnity\KinectSkeletonToUnity\bin\Debug\KinectSkeletonToUnity.exe
+E:\Inzynierka\KinectSkeletonToUnity\KinectSkeletonToUnity\bin\Debug\KinectSkeletonToUnity.exe.config
+E:\Inzynierka\KinectSkeletonToUnity\KinectSkeletonToUnity\bin\Debug\Microsoft.Kinect.dll
+E:\Inzynierka\KinectSkeletonToUnity\KinectSkeletonToUnity\bin\Debug\Microsoft.Kinect.xml
+E:\Inzynierka\KinectSkeletonToUnity\KinectSkeletonToUnity\obj\Debug\KinectSkeletonToUnity.csproj.AssemblyReference.cache
+E:\Inzynierka\KinectSkeletonToUnity\KinectSkeletonToUnity\obj\Debug\KinectSkeletonToUnity.csproj.CoreCompileInputs.cache
+E:\Inzynierka\KinectSkeletonToUnity\KinectSkeletonToUnity\obj\Debug\KinectSk.B37C673B.Up2Date
+E:\Inzynierka\KinectSkeletonToUnity\KinectSkeletonToUnity\obj\Debug\KinectSkeletonToUnity.exe
+E:\Inzynierka\KinectSkeletonToUnity\KinectSkeletonToUnity\obj\Debug\KinectSkeletonToUnity.pdb
+E:\Inzynierka\KinectSkeletonToUnity\KinectSkeletonToUnity\bin\Debug\KinectSkeletonToUnity.pdb
+E:\Inzynierka\KinectSkeletonToUnity\KinectSkeletonToUnity\obj\Debug\KinectSkeletonToUnity.exe.config
