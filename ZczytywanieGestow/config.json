@@ -17,7 +17,7 @@
     "history_len": 20,
     "min_history": 15,
     "direction_changes_threshold": 3,
-    "min_amplitude": 0.20,
+    "min_amplitude": 1.20,
     "cooldown_after_arms_up_sec": 0.6
   },
   "arms_up": {
