@@ -13,6 +13,7 @@ from mediapipe.tasks.python import vision
 
 CAM_INDEX = 0
 MODEL_PATH = "pose_landmarker_lite.task"
+
 NUM_POSES = 1
 MIN_DET_CONF = 0.5
 MIN_PRES_CONF = 0.5
@@ -22,11 +23,12 @@ MIN_TRACK_CONF = 0.5
 CAMERA_PARAMS_PATH = "camera_params.npz"
 USE_UNDISTORT = True
 
+# Twoje zdjęcia kalibracyjne były 640x480 -> najlepiej ustawić kamerę tak samo:
 CAP_WIDTH = 640
 CAP_HEIGHT = 480
 
 # Wymiary sceny (przybliżenie) do przeliczenia px -> cm
-REAL_WIDTH_CM = 10.0
+REAL_WIDTH_CM = 100.0
 
 # Osie / odbicia
 UNITY_AXES = True   # Y w górę, Z do przodu
