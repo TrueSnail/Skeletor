@@ -1,0 +1,36 @@
+{
+  "models": {
+    "pose_model_path": "pose_landmarker_lite.task",
+    "hands_model_path": "hand_landmarker.task"
+  },
+  "camera": {
+    "index": 0,
+    "width": 1280,
+    "height": 720,
+    "flip_horizontal": true
+  },
+  "udp": {
+    "ip": "127.0.0.1",
+    "port": 5005
+  },
+  "wave": {
+    "history_len": 20,
+    "min_history": 15,
+    "direction_changes_threshold": 3,
+    "min_amplitude": 1.20,
+    "cooldown_after_arms_up_sec": 0.6
+  },
+  "arms_up": {
+    "threshold_above_nose": 0.0001
+  },
+  "thumbs_up": {
+    "thumb_up_min_dy": 0.05,
+    "thumb_above_others_margin": 0.02,
+    "vertical_dominates_factor": 1.2,
+    "require_other_fingers_not_above_thumb": true
+  },
+  "send": {
+    "cooldown_same_gesture_sec": 0.1,
+    "gesture_lock_time_sec": 0.7
+  }
+}
