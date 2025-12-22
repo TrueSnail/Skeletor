@@ -11,7 +11,9 @@ using UnityEngine;
 
 public class SkeletonDataReceiver : MonoBehaviour
 {
+    public Transform CharacterOrigin;
     public bool PinToWorldRoot = false;
+    public bool DrawDebugPose = true;
 
     [Header("TEST")]
     public Transform Hips;
@@ -32,8 +34,6 @@ public class SkeletonDataReceiver : MonoBehaviour
     public Transform RightKnee;
     public Transform RightFoot;
 
-    public bool DrawDebugPose = true;
-
     private UdpClient UdpClient;
     private Queue<Action> ExecuteOnMainThread = new();
     private SkeletonDataModel.Root Skeleton;
@@ -42,9 +42,16 @@ public class SkeletonDataReceiver : MonoBehaviour
     {
         UdpClient = new(ConfigLoader.ConfigData.UdpPort);
         UdpClient.BeginReceive(OnPacketRecived, null);
+
+        var origin = ConfigLoader.ConfigData.CharacterOriginPosition;
+        var rotation = ConfigLoader.ConfigData.CharacterRotation;
+        CharacterOrigin.position = new Vector3(origin[0], origin[1], origin[2]);
+        CharacterOrigin.rotation = Quaternion.Euler(rotation[0], rotation[1], rotation[2]);
+        PinToWorldRoot = ConfigLoader.ConfigData.PinCharacterToOriginPosition;
+        DrawDebugPose = ConfigLoader.ConfigData.DrawDebugRig;
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
         lock (ExecuteOnMainThread)
         {
@@ -63,7 +70,7 @@ public class SkeletonDataReceiver : MonoBehaviour
                 lock (ExecuteOnMainThread) ExecuteOnMainThread.Enqueue(() => Debug.Log($"Received UDP message: {message}, {endPoint.Address}"));
             }
 
-            if (true/*ConfigLoader.ConfigData.IpAdressWhitelist.Contains(endPoint.Address.ToString())*/)
+            if (ConfigLoader.ConfigData.IpAdressWhitelist.Contains(endPoint.Address.ToString()))
             {
                 List<SkeletonDataModel.Root> command = DeserializeMessage(message);
                 lock (ExecuteOnMainThread) ExecuteOnMainThread.Enqueue(() => HandleCommand(command));
@@ -91,17 +98,31 @@ public class SkeletonDataReceiver : MonoBehaviour
 
         UnityRotationPose pose = UnityRotationPose.FromPose(command[0].pose);
 
-        Hips.position = PinToWorldRoot ? Vector3.zero : pose.Position;
-        Hips.rotation = pose.Rotation;
-        LeftLegUp.rotation = pose.LeftUpLeg;
-        RightLegUp.rotation = pose.RightUpLeg;
-        LeftKnee.rotation = pose.LeftLeg;
-        RightKnee.rotation = pose.RightLeg;
-        LeftShoulder.rotation = pose.LeftArm;
-        RightShoulder.rotation = pose.RightArm;
-        LeftForearm.rotation = pose.LeftForeArm;
-        RightForearm.rotation = pose.RightForeArm;
-        Neck.rotation = pose.Neck;
+        Hips.position = PinToWorldRoot ? CharacterOrigin.position : CharacterOrigin.position + pose.Position;
+
+        Hips.localRotation = LocalRotation(Hips, pose.Rotation);
+        LeftLegUp.localRotation = LocalRotation(LeftLegUp, pose.LeftUpLeg);
+        RightLegUp.localRotation = LocalRotation(RightLegUp, pose.RightUpLeg);
+        LeftKnee.localRotation = LocalRotation(LeftKnee, pose.LeftLeg);
+        RightKnee.localRotation = LocalRotation(RightKnee, pose.RightLeg);
+        LeftShoulder.localRotation = LocalRotation(LeftShoulder, pose.LeftArm);
+        RightShoulder.localRotation = LocalRotation(RightShoulder, pose.RightArm);
+        LeftForearm.localRotation = LocalRotation(LeftForearm, pose.LeftForeArm);
+        RightForearm.localRotation = LocalRotation(RightForearm, pose.RightForeArm);
+        Neck.localRotation = LocalRotation(Neck, pose.Neck);
+        Hips.localRotation = LocalRotation(Hips, pose.Rotation) * CharacterOrigin.rotation;
+
+        //Hips.position = PinToWorldRoot ? CharacterOrigin.position : CharacterOrigin.position + pose.Position;
+        //Hips.rotation = pose.Rotation;
+        //LeftLegUp.rotation = pose.LeftUpLeg;
+        //RightLegUp.rotation = pose.RightUpLeg;
+        //LeftKnee.rotation = pose.LeftLeg;
+        //RightKnee.rotation = pose.RightLeg;
+        //LeftShoulder.rotation = pose.LeftArm;
+        //RightShoulder.rotation = pose.RightArm;
+        //LeftForearm.rotation = pose.LeftForeArm;
+        //RightForearm.rotation = pose.RightForeArm;
+        //Neck.rotation = pose.Neck;
 
         //TEMP
         //Hips.transform.position = TEMPCONVERT(command[0].pose.Pelvis);
@@ -123,10 +144,7 @@ public class SkeletonDataReceiver : MonoBehaviour
         //RightFoot.transform.position = TEMPCONVERT(command[0].pose.RightAnkle);
     }
 
-    private Vector3 TEMPCONVERT(List<double> list)
-    {
-        return new Vector3((float)list[0], (float)list[1], (float)list[2]);
-    }
+    private Quaternion LocalRotation(Transform transform, Quaternion worldRotation) => Quaternion.Inverse(transform.parent.rotation) * worldRotation;
 
     private void OnDestroy()
     {
