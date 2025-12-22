@@ -13,7 +13,7 @@
     "min_tracking_confidence": 0.5
   },
   "world": {
-    "scale_world": 1,
+    "scale_world": 0.01,
     "flip_x": true,
     "flip_y": true,
     "flip_z": false
