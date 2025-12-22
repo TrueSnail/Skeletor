@@ -2,5 +2,11 @@
 UdpPort = 4242
 IpAdressWhitelist = [ "127.0.0.1" ]
 
+# Visualization #
+CharacterOriginPosition = [4.68, 2.56, -4.96]
+CharacterRotation = [0, -90, 0]
+PinCharacterToOriginPosition = true
+DrawDebugRig = true
+
 # Logging #
 LogReceivedUdpPackets = true

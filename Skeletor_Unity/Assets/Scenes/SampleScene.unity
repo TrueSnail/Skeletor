@@ -1647,7 +1647,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efab9b9fa47936b4182c10592278e6b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CharacterOrigin: {fileID: 1480507759}
   PinToWorldRoot: 1
+  DrawDebugPose: 1
   Hips: {fileID: 1764173180}
   LeftLegUp: {fileID: 1764173194}
   RightLegUp: {fileID: 1764173191}
@@ -1665,7 +1667,6 @@ MonoBehaviour:
   LeftFoot: {fileID: 1764173196}
   RightKnee: {fileID: 1764173192}
   RightFoot: {fileID: 1764173193}
-  DrawDebugPose: 1
 --- !u!4 &1332896081
 Transform:
   m_ObjectHideFlags: 0
@@ -1676,6 +1677,37 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.9882622, y: 1.264112, z: -4.6505265}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1480507758
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1480507759}
+  m_Layer: 0
+  m_Name: CharacterOriginPosition
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1480507759
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1480507758}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4.68, y: 1.56, z: -4.96}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2498,3 +2530,4 @@ SceneRoots:
   - {fileID: 1764173179}
   - {fileID: 257575346}
   - {fileID: 1739506201}
+  - {fileID: 1480507759}
