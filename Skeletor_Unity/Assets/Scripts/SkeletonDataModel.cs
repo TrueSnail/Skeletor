@@ -54,7 +54,7 @@ namespace SkeletonDataModel
         public List<double> RightAnkle { get; set; }
     }
 
-    public class Root
+    public class CommandRoot
     {
         public string userid { get; set; }
         public Pose pose { get; set; }
