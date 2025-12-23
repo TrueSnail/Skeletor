@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3765011330642704204
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9205090400368907401}
+  m_Layer: 0
+  m_Name: ParticlesOrigin
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9205090400368907401
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3765011330642704204}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.001, y: -0.8859, z: -0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1117233791509105099}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4809046534655364567
 GameObject:
   m_ObjectHideFlags: 0
@@ -10,6 +41,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5746542652148049349}
   - component: {fileID: 5777677464739515053}
+  - component: {fileID: 2361737780263279651}
   m_Layer: 0
   m_Name: Character
   m_TagString: Untagged
@@ -65,6 +97,21 @@ MonoBehaviour:
   LeftFoot: {fileID: 7260730836488278149}
   RightKnee: {fileID: 601518951081672814}
   RightFoot: {fileID: 5488459595492305096}
+--- !u!114 &2361737780263279651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4809046534655364567}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45426f7ea98cc884bb4ed758529d59d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ParticlesPrefab: {fileID: 4743060422609163776, guid: f86395653d182e14cb3cf6b743e93515,
+    type: 3}
+  SpawnTransform: {fileID: 9205090400368907401}
 --- !u!1001 &4925774189560172212
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -160,7 +207,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 5465940246521907071, guid: 5c80ebf0d1be90241ae3771fd611b861,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9205090400368907401}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5c80ebf0d1be90241ae3771fd611b861, type: 3}
 --- !u!4 &601518951081672814 stripped
