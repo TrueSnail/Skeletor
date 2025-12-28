@@ -16,20 +16,13 @@ public class CharacterHandler : MonoBehaviour
     public Transform Hips;
     public Transform LeftLegUp;
     public Transform RightLegUp;
-    public Transform LeftShoulder;
-    public Transform RightShoulder;
     public Transform Neck;
-    public Transform Head;
     public Transform LeftArm;
     public Transform LeftForearm;
-    public Transform LeftHand;
     public Transform RightArm;
     public Transform RightForearm;
-    public Transform RightHand;
     public Transform LeftKnee;
-    public Transform LeftFoot;
     public Transform RightKnee;
-    public Transform RightFoot;
 
     private void Start()
     {
@@ -50,15 +43,17 @@ public class CharacterHandler : MonoBehaviour
     public void UpdateCharacter()
     {
         var pose = UnityRotationPose.FromPose(PoseData);
+        if (!enabled) return;
 
         Hips.position = PinToWorldRoot ? CharacterOrigin.position : CharacterOrigin.position + pose.Position;
 
         Hips.localRotation = LocalRotation(Hips, pose.Rotation);
         LeftLegUp.localRotation = LocalRotation(LeftLegUp, pose.LeftUpLeg);
+        RightLegUp.localRotation = LocalRotation(RightLegUp, pose.RightUpLeg);
         LeftKnee.localRotation = LocalRotation(LeftKnee, pose.LeftLeg);
         RightKnee.localRotation = LocalRotation(RightKnee, pose.RightLeg);
-        LeftShoulder.localRotation = LocalRotation(LeftShoulder, pose.LeftArm);
-        RightShoulder.localRotation = LocalRotation(RightShoulder, pose.RightArm);
+        LeftArm.localRotation = LocalRotation(LeftArm, pose.LeftArm);
+        RightArm.localRotation = LocalRotation(RightArm, pose.RightArm);
         LeftForearm.localRotation = LocalRotation(LeftForearm, pose.LeftForeArm);
         RightForearm.localRotation = LocalRotation(RightForearm, pose.RightForeArm);
         Neck.localRotation = LocalRotation(Neck, pose.Neck);
