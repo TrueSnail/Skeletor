@@ -23,6 +23,16 @@ public class CharacterHandler : MonoBehaviour
     public Transform RightForearm;
     public Transform LeftKnee;
     public Transform RightKnee;
+    public RotationInterpolator IHips;
+    public RotationInterpolator ILeftLegUp;
+    public RotationInterpolator IRightLegUp;
+    public RotationInterpolator INeck;
+    public RotationInterpolator ILeftArm;
+    public RotationInterpolator ILeftForearm;
+    public RotationInterpolator IRightArm;
+    public RotationInterpolator IRightForearm;
+    public RotationInterpolator ILeftKnee;
+    public RotationInterpolator IRightKnee;
 
     private void Start()
     {
@@ -47,17 +57,21 @@ public class CharacterHandler : MonoBehaviour
 
         Hips.position = PinToWorldRoot ? CharacterOrigin.position : CharacterOrigin.position + pose.Position;
 
-        Hips.localRotation = LocalRotation(Hips, pose.Rotation);
-        LeftLegUp.localRotation = LocalRotation(LeftLegUp, pose.LeftUpLeg);
-        RightLegUp.localRotation = LocalRotation(RightLegUp, pose.RightUpLeg);
-        LeftKnee.localRotation = LocalRotation(LeftKnee, pose.LeftLeg);
-        RightKnee.localRotation = LocalRotation(RightKnee, pose.RightLeg);
-        LeftArm.localRotation = LocalRotation(LeftArm, pose.LeftArm);
-        RightArm.localRotation = LocalRotation(RightArm, pose.RightArm);
-        LeftForearm.localRotation = LocalRotation(LeftForearm, pose.LeftForeArm);
-        RightForearm.localRotation = LocalRotation(RightForearm, pose.RightForeArm);
-        Neck.localRotation = LocalRotation(Neck, pose.Neck);
-        Hips.localRotation = LocalRotation(Hips, pose.Rotation) * CharacterOrigin.rotation;
+        var hipsRotation = IHips.transform.localRotation;
+        IHips.transform.localRotation = LocalRotation(Hips, pose.Rotation);
+
+        ILeftLegUp.SetTargetRotation(LocalRotation(LeftLegUp, pose.LeftUpLeg));
+        IRightLegUp.SetTargetRotation(LocalRotation(RightLegUp, pose.RightUpLeg));
+        ILeftKnee.SetTargetRotation(LocalRotation(LeftKnee, pose.LeftLeg));
+        IRightKnee.SetTargetRotation(LocalRotation(RightKnee, pose.RightLeg));
+        ILeftArm.SetTargetRotation(LocalRotation(LeftArm, pose.LeftArm));
+        IRightArm.SetTargetRotation(LocalRotation(RightArm, pose.RightArm));
+        ILeftForearm.SetTargetRotation(LocalRotation(LeftForearm, pose.LeftForeArm));
+        IRightForearm.SetTargetRotation(LocalRotation(RightForearm, pose.RightForeArm));
+        INeck.SetTargetRotation(LocalRotation(Neck, pose.Neck));
+
+        IHips.transform.localRotation = hipsRotation;
+        IHips.SetTargetRotation(LocalRotation(Hips, pose.Rotation) * CharacterOrigin.rotation);
     }
 
     private void OnDrawGizmos()

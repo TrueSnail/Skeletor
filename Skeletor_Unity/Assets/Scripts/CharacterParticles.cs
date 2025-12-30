@@ -5,10 +5,13 @@ using UnityEngine;
 public class CharacterParticles : MonoBehaviour
 {
     public GameObject ParticlesPrefab;
-    public Transform SpawnTransform;
+    public SkinnedMeshRenderer MeshRenderer;
+
+    public float ParticlesCount;
 
     private void Start()
     {
+        ParticlesCount = ConfigLoader.ConfigData.CharacterSpawnDespawnParticlesCount;
         Invoke("SpawnParticles", 0.1f);
     }
 
@@ -20,6 +23,12 @@ public class CharacterParticles : MonoBehaviour
 
     public void SpawnParticles()
     {
-        var particles = Instantiate(ParticlesPrefab, SpawnTransform.position, Quaternion.identity);
+        var particles = Instantiate(ParticlesPrefab, transform.position, Quaternion.identity);
+        var system = particles.GetComponent<ParticleSystem>();
+        var emission = system.emission;
+        var shape = system.shape;
+        shape.skinnedMeshRenderer = MeshRenderer;
+        emission.rateOverTime = new ParticleSystem.MinMaxCurve(ParticlesCount);
+        system.Play();
     }
 }

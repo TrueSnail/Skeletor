@@ -4,7 +4,11 @@ IpAdressWhitelist = [ "127.0.0.1" ]
 
 # Visualization #
 CharacterOriginPosition = [4.68, 2.56, -4.96]
-CharacterRotation = [0, -90, 0]
+CharacterRotation = [0, -90, 0] # Rotation in euler angles
+CharacterInterpolationSmoothness = 0.05 # Higher smoother but less responsive. Do not increase past 1.
+CharacterSpawnDespawnParticlesCount = 2200 # High values might cause stuttering
+
+# Debug #
 PinCharacterToOriginPosition = true
 DrawDebugRig = true
 
