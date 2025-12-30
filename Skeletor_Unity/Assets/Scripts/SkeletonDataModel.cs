@@ -54,7 +54,7 @@ namespace SkeletonDataModel
         public List<double> RightAnkle { get; set; }
     }
 
-    public class Root
+    public class CommandRoot
     {
         public string userid { get; set; }
         public Pose pose { get; set; }
@@ -126,13 +126,11 @@ namespace SkeletonDataModel
             return new UnityRotationPose()
             {
                 Position = positionPose.Pelvis,
-                Rotation = Quaternion.LookRotation(Vector3.Cross(positionPose.RightHip - positionPose.LeftHip, Vector3.up), Vector3.Cross(Vector3.Cross(positionPose.RightHip - positionPose.LeftHip, Vector3.up), positionPose.RightHip - positionPose.LeftHip)),
-                //Rotation = Quaternion.LookRotation(Vector3.Cross(direction, Vector3.forward), Vector3.Cross(positionPose.LeftHip - positionPose.RightHip, Vector3.right)),
-                //Rotation = Quaternion.FromToRotation(Vector3.right, positionPose.LeftHip - positionPose.RightHip),
-                LeftUpLeg = GetRotation(positionPose.LeftHip, positionPose.LeftKnee),
-                RightUpLeg = GetRotation(positionPose.RightHip, positionPose.RightKnee),
-                LeftLeg = GetRotation(positionPose.LeftKnee, positionPose.LeftAnkle),
-                RightLeg = GetRotation(positionPose.RightKnee, positionPose.RightAnkle),
+                Rotation = Quaternion.LookRotation(-Vector3.Cross(positionPose.RightHip - positionPose.LeftHip, Vector3.up), Vector3.Cross(Vector3.Cross(positionPose.RightHip - positionPose.LeftHip, Vector3.up), positionPose.RightHip - positionPose.LeftHip)),
+                LeftUpLeg = GetRotation(positionPose.LeftHip, positionPose.LeftKnee, true),
+                RightUpLeg = GetRotation(positionPose.RightHip, positionPose.RightKnee, true),
+                LeftLeg = GetRotation(positionPose.LeftKnee, positionPose.LeftAnkle, true),
+                RightLeg = GetRotation(positionPose.RightKnee, positionPose.RightAnkle, true),
                 LeftArm = GetRotation(positionPose.LeftClavicle, positionPose.LeftElbow),
                 RightArm = GetRotation(positionPose.RightClavicle, positionPose.RightElbow),
                 LeftForeArm = GetRotation(positionPose.LeftElbow, positionPose.LeftWrist),
@@ -141,12 +139,10 @@ namespace SkeletonDataModel
             };
         }
 
-        private static Quaternion GetRotation(Vector3 startBone, Vector3 endBone)
+        private static Quaternion GetRotation(Vector3 startBone, Vector3 endBone, bool inverse = false)
         {
             var direction = endBone - startBone;
-            return Quaternion.LookRotation(Vector3.Cross(direction, Vector3.right), direction);
-            //return Quaternion.FromToRotation(Vector3.up, direction);
-            //return Quaternion.LookRotation(direction.normalized);
+            return Quaternion.LookRotation(Vector3.Cross(direction, Vector3.right) * (inverse ? -1 : 1), direction);
         }
     }
 }
