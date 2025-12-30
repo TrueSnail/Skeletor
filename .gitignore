@@ -612,7 +612,11 @@
 /SkeletonReader/SkeletonPython/.venv_old
 /SkeletonReader/SkeletonPython/.venv_old/
 /SkeletonReader/SkeletonPython/.venv_old/*
-
+/SkeletonReader/SkeletonPython/skeleton.py
+/SkeletonReader/SkeletonPython/skeleton_old.py
+/SkeletonReader/SkeletonPython/Kinect.py
+/SkeletonReader/SkeletonPython/Poses.json
+/SkeletonReader/SkeletonPython/start.py
 
 #Visual Studio
 /SkeletonReader/KinectSkeletonToUnity/*.rsuser
