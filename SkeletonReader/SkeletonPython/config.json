@@ -1,13 +1,15 @@
 {
   "camera": {
-    "index": 0,
+    "source": "camera",
+    "video_path": "C:/Users/k.biegun/Desktop/Dokumenty/Aplikacje/GIT/Skeletor/SkeletonReader/SkeletonPython/DANE/WIN_20251230_13_44_49_Pro.mp4",
+    "index": 2,
     "width": 640,
     "height": 480,
     "mirror_preview": false
   },
   "mediapipe": {
     "model_path": "pose_landmarker_lite.task",
-    "num_poses": 1,
+    "num_poses": 2,
     "min_detection_confidence": 0.5,
     "min_presence_confidence": 0.5,
     "min_tracking_confidence": 0.5
@@ -19,7 +21,7 @@
     "flip_z": false
   },
   "output": {
-    "mode": "udp",
+    "mode": "json",
     "json_path": "poses_world.json",
     "udp_host": "127.0.0.1",
     "udp_port": 4242
