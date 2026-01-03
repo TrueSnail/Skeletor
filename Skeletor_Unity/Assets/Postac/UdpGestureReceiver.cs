@@ -1,8 +1,9 @@
+using System.Collections;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
-using System.Collections;
 
 public class UdpGestureReceiver : MonoBehaviour
 {
@@ -55,7 +56,7 @@ public class UdpGestureReceiver : MonoBehaviour
                 string gesture = ParseGestureFromJson(json);
                 if (!string.IsNullOrEmpty(gesture))
                 {
-                    gesture = gesture.ToLower();
+                    gesture = gesture.ToLower();                  
                     int code = MapGestureToInt(gesture);
 
                     PlayGestureOnce(code);

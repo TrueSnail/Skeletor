@@ -9,7 +9,7 @@ import mediapipe as mp
 
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
-from mediapipe import solutions
+
 from mediapipe.framework.formats import landmark_pb2
 
 CONFIG_PATH = "config.json"
@@ -126,24 +126,27 @@ def draw_hands(frame_bgr, hands_pts_by_label, draw_points=True):
             continue
 
         proto = landmark_pb2.NormalizedLandmarkList()
-        proto.landmark.extend([
-            landmark_pb2.NormalizedLandmark(x=x, y=y, z=z) for x, y, z in pts
-        ])
+        proto.landmark.extend(
+            [landmark_pb2.NormalizedLandmark(x=x, y=y, z=z) for x, y, z in pts]
+        )
 
-        solutions.drawing_utils.draw_landmarks(
+        # === TUTAJ ZMIANA ===
+        mp.solutions.drawing_utils.draw_landmarks(
             annotated,
             proto,
-            solutions.hands.HAND_CONNECTIONS,
-            solutions.drawing_styles.get_default_hand_landmarks_style() if draw_points else None,
-            solutions.drawing_styles.get_default_hand_connections_style()
+            mp.solutions.hands.HAND_CONNECTIONS,
+            mp.solutions.drawing_styles.get_default_hand_landmarks_style() if draw_points else None,
+            mp.solutions.drawing_styles.get_default_hand_connections_style()
         )
 
         xs = [x for x, _, _ in pts]
         ys = [y for _, y, _ in pts]
         tx = int(min(xs) * w)
         ty = max(0, int(min(ys) * h) - 10)
-        cv2.putText(annotated, label, (tx, ty),
-                    cv2.FONT_HERSHEY_DUPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(
+            annotated, label, (tx, ty),
+            cv2.FONT_HERSHEY_DUPLEX, 1, (0, 255, 0), 2
+        )
 
     return cv2.cvtColor(annotated, cv2.COLOR_RGB2BGR)
 
