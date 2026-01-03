@@ -9,7 +9,7 @@ CharacterInterpolationSmoothness = 0.05 # Higher smoother but less responsive. D
 CharacterSpawnDespawnParticlesCount = 2200 # High values might cause stuttering
 
 # Debug #
-PinCharacterToOriginPosition = true
+PinCharacterToOriginPosition = false
 DrawDebugRig = true
 
 # Logging #

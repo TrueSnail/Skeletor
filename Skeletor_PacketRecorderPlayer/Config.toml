@@ -1,3 +1,5 @@
 UdpPort = 2424
-RecordingPlaylist = [ "kinect_packets" ]
+# RecordingPlaylist = [ "TestRotate" ]
+# RecordingPlaylist = [ "kinect_packets" ]
+RecordingPlaylist = [ "Two_people_poses_world_converted" ]
 IsLoggingEnabled = true
