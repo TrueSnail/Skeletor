@@ -84,6 +84,7 @@ MonoBehaviour:
   ParticlesPrefab: {fileID: 4743060422609163776, guid: f86395653d182e14cb3cf6b743e93515,
     type: 3}
   MeshRenderer: {fileID: 7213479897917006689}
+  ParticlesCount: 0
 --- !u!1001 &1068562625182270906
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -142,6 +143,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -1526964690268444965, guid: cc7a81536ccd5a6448b0fd1f32661634,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 4493585093827132993, guid: d14b4acb7122ed04dbd24735f0ac9669,
+        type: 3}
+    - target: {fileID: -1526964690268444965, guid: cc7a81536ccd5a6448b0fd1f32661634,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 85e91af27a9001148a3a9dff9edc19f7, type: 2}
+    - target: {fileID: -1526964690268444965, guid: cc7a81536ccd5a6448b0fd1f32661634,
+        type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 2100000, guid: 4723549b5a1764543af033855db5cd9b, type: 2}
     - target: {fileID: 919132149155446097, guid: cc7a81536ccd5a6448b0fd1f32661634,
         type: 3}
       propertyPath: m_Name

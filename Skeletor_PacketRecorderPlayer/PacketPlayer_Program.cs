@@ -6,7 +6,7 @@ using System.Text.Json;
 using Tomlyn;
 
 ConfigDataModel config = GetConfig();
-UdpClient client = new UdpClient(config.UdpPort);
+UdpClient client = new UdpClient(2424);
 
 while (true)
 {
@@ -28,7 +28,7 @@ while (true)
 void SendText(string text)
 {
     var encodedText = Encoding.UTF8.GetBytes(text);
-    client.Send(encodedText, "127.0.0.1", 4242);
+    client.Send(encodedText, "127.0.0.1", config.UdpPort);
 }
 
 RecordingDataModel[]? GetRecording(string recordingName)
