@@ -13,7 +13,6 @@ public class CharacterManager : MonoBehaviour
     public Transform CharacterOrigin;
 
     private Dictionary<string, CharacterHandler> Characters = new();
-    private CommandRoot Skeleton;
 
     private void Awake()
     {
@@ -30,7 +29,8 @@ public class CharacterManager : MonoBehaviour
 
         foreach (var character in Characters)
         {
-            if (!command.Select(c => c.userid).Contains(character.Key.ToString())) RemoveCharacter(character.Key);
+            if (!command.Select(c => c.userid).Contains(character.Key.ToString())) 
+                RemoveCharacter(character.Key);
         }
     }
 
