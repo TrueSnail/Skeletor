@@ -11,6 +11,7 @@ public class CharacterHandler : MonoBehaviour
     public Transform CharacterOrigin;
     public bool PinToWorldRoot = false;
     public bool DrawDebugPose = true;
+    public float SmoothTime;
 
     [Header("References")]
     public RotationInterpolator IHips;
@@ -24,6 +25,8 @@ public class CharacterHandler : MonoBehaviour
     public RotationInterpolator ILeftKnee;
     public RotationInterpolator IRightKnee;
 
+    private Vector3 CurrentPositionVelocityRef;
+
     private void Start()
     {
         var origin = ConfigLoader.ConfigData.CharacterOriginPosition;
@@ -32,6 +35,12 @@ public class CharacterHandler : MonoBehaviour
         CharacterOrigin.rotation = Quaternion.Euler(rotation[0], rotation[1], rotation[2]);
         PinToWorldRoot = ConfigLoader.ConfigData.PinCharacterToOriginPosition;
         DrawDebugPose = ConfigLoader.ConfigData.DrawDebugRig;
+        SmoothTime = ConfigLoader.ConfigData.CharacterInterpolationSmoothness;
+    }
+
+    private void Update()
+    {
+        UpdatePosition();
     }
 
     public void UpdatePose(SkeletonDataModel.Pose pose)
@@ -44,8 +53,6 @@ public class CharacterHandler : MonoBehaviour
     {
         var pose = UnityRotationPose.FromPose(PoseData);
         if (!enabled) return;
-
-        IHips.transform.position = PinToWorldRoot ? CharacterOrigin.position : CharacterOrigin.position + pose.Position;
 
         var hipsRotation = IHips.transform.localRotation;
         IHips.transform.localRotation = LocalRotation(IHips.transform, pose.Rotation);
@@ -62,6 +69,15 @@ public class CharacterHandler : MonoBehaviour
 
         IHips.transform.localRotation = hipsRotation;
         IHips.SetTargetRotation(LocalRotation(IHips.transform, pose.Rotation) * CharacterOrigin.rotation);
+    }
+
+    private void UpdatePosition()
+    {
+        if (!enabled) return;
+        var pose = UnityRotationPose.FromPose(PoseData);
+        var targetPosition = PinToWorldRoot ? CharacterOrigin.position : CharacterOrigin.position + pose.Position;
+        IHips.transform.position = Vector3.SmoothDamp(IHips.transform.position, targetPosition, ref CurrentPositionVelocityRef, SmoothTime);
+
     }
 
     private void OnDrawGizmos()
