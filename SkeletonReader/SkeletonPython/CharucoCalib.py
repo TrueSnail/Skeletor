@@ -1,50 +1,33 @@
-# File: CharucoCalib.py
-# -----------------------------------------------------------
-# Automatyczna kalibracja kamery z użyciem ChArUco (bez klikania).
-# Działanie:
-#  1) Uruchom skrypt – złap planszę ChArUco w kadr;
-#  2) Skrypt sam zbierze TARGET_FRAMES „dobrych” klatek (różne pozycje/odległości);
-#  3) Po zebraniu wykona kalibrację i zapisze camera_params.npz;
-#  4) Opcjonalnie pokaże krótki podgląd undistort.
-# -----------------------------------------------------------
-
 import os
 import glob
 import time
 import numpy as np
 import cv2
 
-# =============== USTAWIENIA ===============
-
-# Kamera
 CAM_INDEX = 0
 
-# Parametry planszy (MUSZĄ odpowiadać wydrukowi)
 SQUARES_X = 8
 SQUARES_Y = 11
 SQUARE_LENGTH_MM = 12.0
-MARKER_LENGTH_MM = 9.0   # typowo 75% długości pola, ale zależy od tablicy
+MARKER_LENGTH_MM = 9.0  
 DICT_NAME = "DICT_4X4_50"
 
-# Docelowa liczba klatek do kalibracji i limity
 TARGET_FRAMES = 30            # ile dobrych ujęć zebrać
 MAX_DURATION_SEC = 180        # maks. czas zbierania
 MIN_CORNERS = 20              # minimalna liczba narożników ChArUco na klatkę
 MIN_TIME_BETWEEN_S = 0.5      # minimalny odstęp czasowy między zapisami
 MIN_MOVE_PX = 25.0            # minimalne „przesunięcie” planszy względem poprzedniego zapisu
-MIN_AREA_CHANGE = 0.10        # minimalna zmiana pola (10%) względem ostatniego zapisu
+MIN_AREA_CHANGE = 0.10        # minimalna zmiana pola
 
-# Ścieżki/wyjścia
+
 CAP_DIR = "calibration_images_auto"
 PARAMS_NPZ = "camera_params.npz"
 SHOW_UNDISTORT_PREVIEW = True
 UNDISTORT_PREVIEW_SEC = 6
 
-# Rozmiar generowanej grafiki planszy (opcjonalnie: do wydruku)
-BOARD_PNG = "charuco_board.png"
-BOARD_IMG_SIZE = (600, 900)  # (szer, wys) px
 
-# =========================================
+BOARD_PNG = "charuco_board.png"
+BOARD_IMG_SIZE = (600, 900)
 
 
 def _get_aruco():
@@ -93,11 +76,6 @@ def _detect_charuco(gray, board, dictionary):
 
 
 def _charuco_stats(ch_corners):
-    """
-    Zwraca proste miary różnorodności:
-    - centroid (cx, cy)
-    - pole bbox (area_px)
-    """
     pts = ch_corners.reshape(-1, 2)
     cx = float(np.mean(pts[:, 0]))
     cy = float(np.mean(pts[:, 1]))
@@ -190,18 +168,8 @@ def undistort_preview(npz_path=PARAMS_NPZ, cam_index=CAM_INDEX, seconds=UNDISTOR
 
 
 def auto_capture_and_calibrate():
-    """
-    Automatyczne zbieranie klatek:
-    - zapisuje tylko wtedy, gdy:
-        * wykryto >= MIN_CORNERS narożników,
-        * minęło MIN_TIME_BETWEEN_S od ostatniego zapisu,
-        * centroid przesunął się o >= MIN_MOVE_PX LUB
-          pole bbox różni się o >= MIN_AREA_CHANGE.
-    - kończy po zebraniu TARGET_FRAMES lub po MAX_DURATION_SEC.
-    Następnie uruchamia kalibrację i (opcjonalnie) undistort preview.
-    """
     os.makedirs(CAP_DIR, exist_ok=True)
-    # wyczyść poprzednie (opcjonalnie – skomentuj jeśli chcesz zachować)
+
     for p in glob.glob(os.path.join(CAP_DIR, "*.png")):
         try:
             os.remove(p)
@@ -239,23 +207,19 @@ def auto_capture_and_calibrate():
         if ch_corners is not None and ch_ids is not None and len(ch_corners) >= MIN_CORNERS:
             (cx, cy), area = _charuco_stats(ch_corners)
 
-            # odstęp czasowy
             enough_time = (time.time() - last_time) >= MIN_TIME_BETWEEN_S
 
-            # zróżnicowanie pozycji/rozmiaru
             moved_ok = True
             area_ok = True
             if last_centroid is not None:
                 moved_ok = (np.hypot(cx - last_centroid[0], cy - last_centroid[1]) >= MIN_MOVE_PX)
             if last_area is not None:
-                # względna zmiana pola
                 area_change = abs(area - last_area) / max(1.0, last_area)
                 area_ok = (area_change >= MIN_AREA_CHANGE)
 
             ready_to_save = enough_time and (moved_ok or area_ok)
             status_txt = f"ChArUco OK: {len(ch_corners)} narożników | move:{moved_ok} areaΔ:{area_ok}"
 
-            # narysuj wykrytą planszę (dla podglądu)
             cv2.circle(frame, (int(cx), int(cy)), 6, (0, 255, 0), 2)
             x0y0 = np.min(ch_corners.reshape(-1,2), axis=0).astype(int)
             x1y1 = np.max(ch_corners.reshape(-1,2), axis=0).astype(int)
@@ -270,10 +234,8 @@ def auto_capture_and_calibrate():
                 last_area = area
                 status_txt = f"[ZAPISANO] {fname}  ({saved}/{TARGET_FRAMES})"
         else:
-            # brak wykrycia / za mało narożników
             pass
 
-        # overlay
         elapsed = time.time() - t_start
         cv2.putText(frame, f"{status_txt}", (10, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0,255,0), 2)
@@ -281,7 +243,6 @@ def auto_capture_and_calibrate():
                     (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0,255,0), 2)
         cv2.imshow("Auto ChArUco Capture", frame)
 
-        # warunki zakończenia zbierania
         if saved >= TARGET_FRAMES or elapsed >= MAX_DURATION_SEC:
             break
 
@@ -301,21 +262,18 @@ def auto_capture_and_calibrate():
 
 
 def main():
-    # (opcjonalnie) zapisz plik z planszą do wydruku
     if not os.path.exists(BOARD_PNG):
         try:
             save_board_png(BOARD_PNG)
         except Exception as e:
             print("[WARN] Nie zapisano planszy (to nie blokuje dalszych kroków):", e)
 
-    # auto-capture + calibrate
     auto_capture_and_calibrate()
 
 
 if __name__ == "__main__":
-    # krótka diagnostyka aruco
     try:
-        from cv2 import aruco  # noqa: F401
+        from cv2 import aruco
     except Exception as e:
         print("[ERR] cv2.aruco niedostępne. Zainstaluj: pip install opencv-contrib-python")
         raise
