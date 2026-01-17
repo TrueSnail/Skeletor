@@ -130,7 +130,6 @@ def draw_hands(frame_bgr, hands_pts_by_label, draw_points=True):
             [landmark_pb2.NormalizedLandmark(x=x, y=y, z=z) for x, y, z in pts]
         )
 
-        # === TUTAJ ZMIANA ===
         mp.solutions.drawing_utils.draw_landmarks(
             annotated,
             proto,
@@ -245,11 +244,32 @@ def detect_thumbs_up_fist(pts, thumbs_cfg) -> bool:
     return bool(thumb_shape_ok and thumb_highest and vertical_dominates)
 
 
+# --- NOWY: sam warunek „kciuk najwyżej” do blokowania wave ---
+def thumb_is_highest(pts, thumbs_cfg) -> bool:
+    """
+    True jeśli czubek kciuka jest wyżej niż czubki pozostałych palców (o margines skalowany dłonią).
+    Używane jako blokada wave (żeby thumbs-up nie odpalał wave).
+    """
+    thumb_tip = pts[4]
+    index_tip = pts[8]
+    middle_tip = pts[12]
+    ring_tip = pts[16]
+    pinky_tip = pts[20]
+
+    scale = max(0.02, hand_scale(pts))
+    margin_factor = float(thumbs_cfg.get("thumb_above_others_margin", 0.10))
+    margin = max(0.01, margin_factor * scale)
+
+    return (
+        thumb_tip[1] < index_tip[1] - margin and
+        thumb_tip[1] < middle_tip[1] - margin and
+        thumb_tip[1] < ring_tip[1] - margin and
+        thumb_tip[1] < pinky_tip[1] - margin
+    )
+
+
 # ================= ANGLE + WAVE ARM-READY CONDITION (POSE) =================
 def angle_deg(a, b, c):
-    """
-    Kąt ABC w stopniach (wierzchołek = b). a,b,c to landmarki pose z .x .y
-    """
     v1 = np.array([a.x - b.x, a.y - b.y], dtype=np.float32)
     v2 = np.array([c.x - b.x, c.y - b.y], dtype=np.float32)
 
@@ -262,24 +282,21 @@ def angle_deg(a, b, c):
     return float(np.degrees(np.arccos(cosang)))
 
 
-def is_right_arm_ready_for_wave(pose_landmarks,
-                                elbow_max_angle_deg=165.0,
-                                wrist_above_hip_margin=0.03):
-    """
-    Warunek anty-false-positive:
-    - prawa ręka uniesiona (nadgarstek wyżej niż biodro o margines)
-    - łokieć zgięty (kąt w łokciu < elbow_max_angle_deg)
-    Indeksy pose: RS=12, RE=14, RW=16, RH=24
-    """
-    RS, RE, RW, RH = 12, 14, 16, 24
-    shoulder = pose_landmarks[RS]
-    elbow = pose_landmarks[RE]
-    wrist = pose_landmarks[RW]
-    hip = pose_landmarks[RH]
+def is_arm_ready_for_wave(pose_landmarks, side: str,
+                          elbow_max_angle_deg=165.0,
+                          wrist_above_hip_margin=0.03):
+    if side == "Right":
+        S, E, W, H = 12, 14, 16, 24
+    else:
+        S, E, W, H = 11, 13, 15, 23
+
+    shoulder = pose_landmarks[S]
+    elbow = pose_landmarks[E]
+    wrist = pose_landmarks[W]
+    hip = pose_landmarks[H]
 
     ang = angle_deg(shoulder, elbow, wrist)
     elbow_bent = ang < elbow_max_angle_deg
-
     arm_raised = wrist.y < (hip.y - wrist_above_hip_margin)
 
     return elbow_bent and arm_raised
@@ -413,13 +430,21 @@ def main():
     sender = UdpSender(cfg["udp"]["ip"], int(cfg["udp"]["port"]), float(cfg["send"]["cooldown_same_gesture_sec"]))
     lock = GestureLock(float(cfg["send"]["gesture_lock_time_sec"]))
 
+    # WAVE: osobna historia dla lewej i prawej dłoni
     wave_cfg = cfg["wave"]
-    wave = WaveDetector(
+    wave_right = WaveDetector(
         history_len=wave_cfg["history_len"],
         min_history=wave_cfg["min_history"],
         direction_changes_threshold=wave_cfg["direction_changes_threshold"],
         min_amplitude_factor=wave_cfg["min_amplitude"]
     )
+    wave_left = WaveDetector(
+        history_len=wave_cfg["history_len"],
+        min_history=wave_cfg["min_history"],
+        direction_changes_threshold=wave_cfg["direction_changes_threshold"],
+        min_amplitude_factor=wave_cfg["min_amplitude"]
+    )
+
     cooldown_after_arms = float(wave_cfg.get("cooldown_after_arms_up_sec", 0.6))
 
     thumbs_cfg = cfg["thumbs_up"]
@@ -463,7 +488,6 @@ def main():
 
         # ==== GESTY (priorytety) ====
         gesture_raw = "idle"
-
         plm = pose.last_pose_landmarks
 
         # 1) arms_up
@@ -471,29 +495,61 @@ def main():
             gesture_raw = "arms_up"
             last_arms_time = now
 
-        # 2) thumbs_up
-        if gesture_raw == "idle" and right_pts is not None:
-            if detect_thumbs_up_fist(right_pts, thumbs_cfg):
+        # 2) thumbs_up -> wykryj na dowolnej dłoni
+        if gesture_raw == "idle":
+            thumbs_detected = False
+            for pts in (right_pts, left_pts):
+                if pts is not None and detect_thumbs_up_fist(pts, thumbs_cfg):
+                    thumbs_detected = True
+                    break
+            if thumbs_detected:
                 gesture_raw = "thumbs_up"
 
-        # 3) wave (TYLKO gdy łokieć zgięty i ręka uniesiona)
+        # 3) wave -> wykryj na prawej lub lewej, ale NIE jeśli kciuk jest najwyżej
         if gesture_raw == "idle":
-            arm_ok = False
-            if plm is not None:
-                arm_ok = is_right_arm_ready_for_wave(
-                    plm,
-                    elbow_max_angle_deg=165.0,
-                    wrist_above_hip_margin=0.03
-                )
+            wave_found = False
 
-            if right_pts is not None and arm_ok and (now - last_arms_time) >= cooldown_after_arms:
-                wave.update(right_pts[0][0])  # wrist.x
-                hand_size_x = abs(right_pts[5][0] - right_pts[17][0])  # index_mcp.x - pinky_mcp.x
-                if wave.detect(hand_size_x=hand_size_x):
-                    gesture_raw = "wave"
+            # PRAWA
+            arm_ok_r = False
+            if plm is not None:
+                arm_ok_r = is_arm_ready_for_wave(plm, "Right", elbow_max_angle_deg=165.0, wrist_above_hip_margin=0.03)
+
+            if right_pts is not None:
+                # BLOKADA: jeśli kciuk najwyżej -> nie wave
+                if thumb_is_highest(right_pts, thumbs_cfg):
+                    wave_right.reset()
+                elif arm_ok_r and (now - last_arms_time) >= cooldown_after_arms:
+                    wave_right.update(right_pts[0][0])
+                    hand_size_x_r = abs(right_pts[5][0] - right_pts[17][0])
+                    if wave_right.detect(hand_size_x=hand_size_x_r):
+                        wave_found = True
+                else:
+                    wave_right.reset()
             else:
-                # ważne: jeśli poza ręki nie spełnia warunku, czyść historię wave
-                wave.reset()
+                wave_right.reset()
+
+            # LEWA (jeśli prawa nie wykryła)
+            if not wave_found:
+                arm_ok_l = False
+                if plm is not None:
+                    arm_ok_l = is_arm_ready_for_wave(plm, "Left", elbow_max_angle_deg=165.0, wrist_above_hip_margin=0.03)
+
+                if left_pts is not None:
+                    # BLOKADA: jeśli kciuk najwyżej -> nie wave
+                    if thumb_is_highest(left_pts, thumbs_cfg):
+                        wave_left.reset()
+                    elif arm_ok_l and (now - last_arms_time) >= cooldown_after_arms:
+                        wave_left.update(left_pts[0][0])
+                        hand_size_x_l = abs(left_pts[5][0] - left_pts[17][0])
+                        if wave_left.detect(hand_size_x=hand_size_x_l):
+                            wave_found = True
+                    else:
+                        wave_left.reset()
+                else:
+                    wave_left.reset()
+
+            if wave_found:
+                gesture_raw = "wave"
 
         gesture = lock.apply(gesture_raw)
         sender.send(gesture)
