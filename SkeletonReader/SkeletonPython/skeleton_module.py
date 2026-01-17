@@ -11,16 +11,14 @@ from typing import Optional, List, Dict, Any, Tuple
 import cv2
 import numpy as np
 import mediapipe as mp
-
-
-# ============================================================
-#                    CONFIG HANDLING
-# ============================================================
+from mediapipe.python.solutions.pose import PoseLandmark
 
 CONFIG_PATH = "config.json"
 
 DEFAULT_CONFIG = {
     "camera": {
+        "source": "camera",
+        "video_path": "",
         "index": 0,
         "width": 640,
         "height": 480,
@@ -67,10 +65,6 @@ DEFAULT_CONFIG = {
 }
 
 def ensure_config(path: str) -> dict:
-    """
-    Jeśli config.json nie istnieje tworzy go
-    Jeśli istnieje tylko wczytuje
-    """
     if not os.path.exists(path):
         with open(path, "w", encoding="utf-8") as f:
             json.dump(DEFAULT_CONFIG, f, ensure_ascii=False, indent=2)
@@ -81,10 +75,6 @@ def ensure_config(path: str) -> dict:
         return json.load(f)
 
 CFG = ensure_config(CONFIG_PATH)
-
-# ============================================================
-#                   SKELETON MAPPING
-# ============================================================
 
 BONE_MAP = {
     "Head": 0,
@@ -103,6 +93,20 @@ POSE_CONNECTIONS = [
     (23,24),(11,23),(12,24),(23,25),(25,27),(24,26),(26,28)
 ]
 
+def midpoint2(a, b):
+    bone = [(a[i] + b[i]) / 2.0 for i in range(2)]
+    bone.append(0)
+    return bone
+
+def bones_from_points2d(points, bone):
+    bones = []
+    if bone in BONE_MAP and isinstance(BONE_MAP[bone], tuple):
+        _, i, j = BONE_MAP[bone]
+        bones = midpoint2(points[i], points[j])
+
+    return bones
+
+
 def midpoint3(a, b):
     return [(a[i] + b[i]) / 2.0 for i in range(3)]
 
@@ -115,10 +119,6 @@ def bones_from_points(points):
         else:
             bones[name] = points[spec]
     return bones
-
-# ============================================================
-#                    ONE EURO FILTER
-# ============================================================
 
 def _alpha(cutoff, dt):
     tau = 1.0 / (2.0 * math.pi * cutoff)
@@ -146,10 +146,6 @@ class OneEuro1D:
         self.dx_prev = dx_hat
         return x_hat
 
-# ============================================================
-#                    MAIN TRACKER
-# ============================================================
-
 class SkeletonTracker:
 
     def __init__(self):
@@ -174,6 +170,8 @@ class SkeletonTracker:
         self.prev_ts = None
         self.filters_3d = defaultdict(dict)
 
+        self.user_offsets = {}
+
     def close(self):
         self.landmarker.close()
 
@@ -190,17 +188,19 @@ class SkeletonTracker:
 
         entries = []
         if result and result.pose_world_landmarks:
-            for idx, world_lms in enumerate(result.pose_world_landmarks):
+            for idx, (local_lms, world_lms) in enumerate(zip(result.pose_landmarks, result.pose_world_landmarks)):
                 if idx not in self.index_to_userid:
                     self.index_to_userid[idx] = str(uuid.uuid4())
                 userid = self.index_to_userid[idx]
 
                 pts = []
-                for lm in world_lms:
-                    x, y, z = lm.x, lm.y, lm.z
-                    if CFG["world"]["flip_x"]: x = -x
-                    if CFG["world"]["flip_y"]: y = -y
-                    if CFG["world"]["flip_z"]: z = -z
+                for (lm_local, lm_world) in zip(local_lms, world_lms):
+                    x,y,z = [0,0,0]
+
+                    if CFG["world"]["flip_x"]: x = -lm_world.x
+                    if CFG["world"]["flip_y"]: y = -lm_world.y
+                    if CFG["world"]["flip_z"]: z = -lm_world.z
+
                     pts.append([
                         x * CFG["world"]["scale_world"],
                         y * CFG["world"]["scale_world"],
@@ -208,6 +208,10 @@ class SkeletonTracker:
                     ])
 
                 bones = bones_from_points(pts)
+
+                bones["Pelvis"] = midpoint2([local_lms[BONE_MAP["Pelvis"][1]].x, local_lms[BONE_MAP["Pelvis"][1]].y, 0],
+                                            [local_lms[BONE_MAP["Pelvis"][2]].x, local_lms[BONE_MAP["Pelvis"][2]].y, 0])
+
 
                 if CFG["smoothing"]["enabled_3d"]:
                     p = CFG["smoothing"]["oneeuro_3d"]
@@ -225,6 +229,17 @@ class SkeletonTracker:
                             fy.filter(v[1], dt),
                             fz.filter(v[2], dt)
                         ]
+
+                '''PELIVS_Z_OFFSET = 3.6
+                if "Pelvis" in bones and PELIVS_Z_OFFSET != 0:
+                    if userid not in self.user_offsets:
+                        self.user_offsets[userid] = len(self.user_offsets) * PELIVS_Z_OFFSET
+                    bones["Pelvis"][2] = (bones["Pelvis"][0] * 1000) + self.user_offsets[userid]'''
+
+
+                bones["Pelvis"][2] = bones["Pelvis"][0]*10
+                bones["Pelvis"][0] = world_lms[10].x - world_lms[11].x
+
 
                 entries.append({"userid": userid, "pose": bones})
 
